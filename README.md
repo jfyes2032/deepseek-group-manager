@@ -2,6 +2,8 @@
 
 为 [DeepSeek 网页版](https://chat.deepseek.com) 增加对话历史分组管理功能的 Chrome 扩展。
 
+![主界面](images/deepseek-group-manager.png)
+
 ---
 
 ## 功能列表
@@ -48,6 +50,8 @@
 
 ### 数据管理
 - **导出备份**：点击扩展图标 → "导出数据"，下载 JSON 格式备份文件
+
+![设置面板](images/group-panel.png)
 - **导入恢复**：点击扩展图标 → "导入数据"，支持完全替换或合并到现有数据
 - **清除数据**：一键清除所有分组数据（建议先导出备份）
 
