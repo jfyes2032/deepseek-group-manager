@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DeepSeek Chat Group Manager</title>
+<style>
+    /* popup 内联样式（完全自包含，不依赖外部资源） */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        width: 340px;
+        min-height: 200px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        font-size: 13px;
+        background: #1a1a2e;
+        color: #e0e0ec;
+        padding: 0;
+        user-select: none;
+    }
+    .popup-header {
+        display: flex;
+        align-items: center;
+        padding: 12px 16px;
+        border-bottom: 1px solid #2a2a4a;
+        background: #16213e;
+    }
+    .popup-header-icon {
+        font-size: 20px;
+        margin-right: 10px;
+    }
+    .popup-header-title {
+        font-weight: 600;
+        font-size: 14px;
+        flex: 1;
+    }
+    .popup-header-version {
+        font-size: 10px;
+        color: #6a6a8a;
+    }
+    .popup-section {
+        padding: 12px 16px;
+        border-bottom: 1px solid #2a2a4a;
+    }
+    .popup-section:last-child {
+        border-bottom: none;
+    }
+    .popup-section-title {
+        font-size: 11px;
+        font-weight: 600;
+        color: #9898b8;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+    }
+    .popup-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 6px;
+    }
+    .popup-row:last-child { margin-bottom: 0; }
+    .popup-label {
+        color: #e0e0ec;
+        font-size: 13px;
+    }
+    .popup-hint {
+        font-size: 10px;
+        color: #6a6a8a;
+        margin-top: 2px;
+    }
+    /* 开关样式 */
+    .toggle {
+        position: relative;
+        width: 40px;
+        height: 22px;
+        flex-shrink: 0;
+    }
+    .toggle input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    .toggle-slider {
+        position: absolute;
+        inset: 0;
+        background: #3a3a5a;
+        border-radius: 22px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .toggle-slider::before {
+        content: '';
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        left: 3px;
+        bottom: 3px;
+        background: #e0e0ec;
+        border-radius: 50%;
+        transition: transform 0.2s;
+    }
+    .toggle input:checked + .toggle-slider {
+        background: #4f8cff;
+    }
+    .toggle input:checked + .toggle-slider::before {
+        transform: translateX(18px);
+    }
+    /* 按钮样式 */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        height: 30px;
+        padding: 0 12px;
+        border: none;
+        border-radius: 4px;
+        background: #4f8cff;
+        color: #fff;
+        font-size: 12px;
+        font-family: inherit;
+        cursor: pointer;
+        transition: background 0.15s;
+    }
+    .btn:hover { background: #6ba0ff; }
+    .btn:active { opacity: 0.85; }
+    .btn-sm {
+        height: 26px;
+        padding: 0 8px;
+        font-size: 11px;
+    }
+    .btn-ghost {
+        background: transparent;
+        color: #9898b8;
+        border: 1px solid #2a2a4a;
+    }
+    .btn-ghost:hover {
+        background: #1f2b47;
+        color: #e0e0ec;
+    }
+    .btn-danger {
+        background: #c0392b;
+    }
+    .btn-danger:hover {
+        background: #e74c3c;
+    }
+    .btn-full {
+        width: 100%;
+        justify-content: center;
+    }
+    /* 统计信息 */
+    .stat-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+    .stat-item {
+        background: #0f0f23;
+        border: 1px solid #2a2a4a;
+        border-radius: 6px;
+        padding: 10px;
+        text-align: center;
+    }
+    .stat-number {
+        font-size: 22px;
+        font-weight: 700;
+        color: #4f8cff;
+    }
+    .stat-label {
+        font-size: 10px;
+        color: #6a6a8a;
+        margin-top: 2px;
+    }
+    /* 通知提示 */
+    .toast {
+        position: fixed;
+        bottom: 12px;
+        left: 12px;
+        right: 12px;
+        padding: 8px 12px;
+        border-radius: 4px;
+        background: #2d8a4e;
+        color: #fff;
+        font-size: 12px;
+        text-align: center;
+        animation: toast-in 0.2s ease;
+        z-index: 10;
+        pointer-events: none;
+    }
+    .toast.error { background: #c0392b; }
+    @keyframes toast-in {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+</head>
+<body>
+    <div class="popup-header">
+        <span class="popup-header-icon">📁</span>
+        <span class="popup-header-title">Chat Group Manager</span>
+        <span class="popup-header-version">v1.0</span>
+    </div>
+
+    <!-- 统计信息区 -->
+    <div class="popup-section">
+        <div class="popup-section-title">概览</div>
+        <div class="stat-grid">
+            <div class="stat-item">
+                <div class="stat-number" id="statGroups">0</div>
+                <div class="stat-label">分组数量</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="statMapped">0</div>
+                <div class="stat-label">已分组对话</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 设置区 -->
+    <div class="popup-section">
+        <div class="popup-section-title">设置</div>
+        <div class="popup-row">
+            <div>
+                <div class="popup-label">调试模式</div>
+                <div class="popup-hint">在控制台输出详细日志</div>
+            </div>
+            <label class="toggle">
+                <input type="checkbox" id="toggleDebug">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+        <div class="popup-row">
+            <div>
+                <div class="popup-label">禁用插件</div>
+                <div class="popup-hint">临时恢复原始侧边栏</div>
+            </div>
+            <label class="toggle">
+                <input type="checkbox" id="toggleDisabled">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+    </div>
+
+    <!-- 数据管理区 -->
+    <div class="popup-section">
+        <div class="popup-section-title">数据管理</div>
+        <div class="popup-row">
+            <button class="btn btn-sm btn-ghost" id="btnExport">📤 导出数据</button>
+            <button class="btn btn-sm btn-ghost" id="btnImport">📥 导入数据</button>
+        </div>
+        <div class="popup-hint" style="margin-top:6px;">
+            导出可作为备份，导入支持合并到现有分组。
+        </div>
+        <!-- 隐藏的文件输入用于导入 -->
+        <input type="file" id="importFileInput" accept=".json" style="display:none;">
+    </div>
+
+    <!-- 危险操作区 -->
+    <div class="popup-section">
+        <div class="popup-section-title">危险操作</div>
+        <button class="btn btn-sm btn-danger btn-full" id="btnClearAll">
+            ⚠ 清除所有分组数据
+        </button>
+        <div class="popup-hint" style="margin-top:4px;">
+            此操作不可撤销，建议先导出备份。
+        </div>
+    </div>
+
+    <!-- 关于 -->
+    <div class="popup-section" style="text-align:center; padding:8px 16px;">
+        <a href="https://github.com/jfyes2032" target="_blank" style="color:#6a6a8a; font-size:11px; text-decoration:none; margin:0 8px;">关于我</a>
+        <a href="https://github.com/jfyes2032/deepseek-group-manager" target="_blank" style="color:#6a6a8a; font-size:11px; text-decoration:none; margin:0 8px;">更新</a>
+    </div>
+
+    <!-- Toast 通知容器 -->
+    <div id="toastContainer"></div>
+
+    <script src="popup.js"></script>
+</body>
+</html>

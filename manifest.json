@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "DeepSeek Chat Group Manager",
+  "version": "1.0.0",
+  "description": "为 DeepSeek 网页版增加对话历史分组管理功能，支持创建分组、移动对话、快速检索。",
+  "permissions": ["storage"],
+  "host_permissions": ["https://chat.deepseek.com/*"],
+  "content_scripts": [
+    {
+      "matches": ["https://chat.deepseek.com/*"],
+      "js": ["content.js"],
+      "css": ["styles.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "DeepSeek Chat Group Manager",
+    "default_icon": {
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "128": "icons/icon128.png"
+  }
+}

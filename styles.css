@@ -1,0 +1,620 @@
+/**
+ * styles.css - DeepSeek Chat Group Manager
+ *
+ * 设计原则：
+ * 1. 匹配 DeepSeek 原生暗色主题风格
+ * 2. 所有选择器使用 .gm- 前缀，避免与页面原有样式冲突
+ * 3. 不依赖外部 CSS 框架，完全自包含
+ * 4. 使用 CSS 变量方便主题切换
+ */
+
+/* ============================================================
+ * CSS 变量定义（暗色主题为基础）
+ * ============================================================ */
+.gm-root {
+    /* 主色调 */
+    --gm-bg-primary: #1a1a2e;
+    --gm-bg-secondary: #16213e;
+    --gm-bg-hover: #1f2b47;
+    --gm-bg-active: #253553;
+    --gm-bg-input: #0f0f23;
+
+    /* 边框和分隔线 */
+    --gm-border: #2a2a4a;
+    --gm-border-light: #333358;
+
+    /* 文字颜色 */
+    --gm-text-primary: #e0e0ec;
+    --gm-text-secondary: #9898b8;
+    --gm-text-muted: #6a6a8a;
+
+    /* 强调色 */
+    --gm-accent: #4f8cff;
+    --gm-accent-hover: #6ba0ff;
+    --gm-accent-subtle: rgba(79, 140, 255, 0.12);
+
+    /* 分组颜色 */
+    --gm-folder-color: #e8b850;
+    --gm-folder-open: #f0c860;
+
+    /* 按钮颜色 */
+    --gm-btn-add: #2d8a4e;
+    --gm-btn-add-hover: #35a35a;
+    --gm-btn-danger: #c0392b;
+    --gm-btn-danger-hover: #e74c3c;
+
+    /* 阴影/圆角 */
+    --gm-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --gm-radius: 6px;
+    --gm-radius-sm: 4px;
+
+    /* 尺寸 */
+    --gm-sidebar-width: 260px;
+    --gm-item-height: 26px;
+    --gm-group-header-height: 26px;
+
+    /* 过渡 */
+    --gm-transition: 150ms ease;
+
+    /* 字体 */
+    --gm-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --gm-font-size: 12px;
+    --gm-font-size-sm: 10px;
+    --gm-font-size-lg: 13px;
+}
+
+/* 浅色主题调整（根据 DeepSeek 页面状态自动切换） */
+.gm-root.gm-theme-light {
+    --gm-bg-primary: #ffffff;
+    --gm-bg-secondary: #f8f9fa;
+    --gm-bg-hover: #f0f1f3;
+    --gm-bg-active: #e8eaed;
+    --gm-bg-input: #f0f1f3;
+    --gm-border: #e0e2e6;
+    --gm-border-light: #d0d2d6;
+    --gm-text-primary: #1a1a2e;
+    --gm-text-secondary: #5a5a7a;
+    --gm-text-muted: #8a8aaa;
+    --gm-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --gm-accent-subtle: rgba(79, 140, 255, 0.08);
+}
+
+/* ============================================================
+ * 根容器 — 替换原始侧边栏内容
+ * ============================================================ */
+.gm-root {
+    font-family: var(--gm-font);
+    font-size: var(--gm-font-size);
+    color: var(--gm-text-primary);
+    background: var(--gm-bg-primary);
+    /* 关键：在父容器中填充可用空间 */
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    user-select: none;
+}
+
+/* ============================================================
+ * 顶部工具栏：搜索 + 新建分组按钮
+ * ============================================================ */
+.gm-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 8px;
+    border-bottom: 1px solid var(--gm-border);
+    background: var(--gm-bg-secondary);
+    flex-shrink: 0;
+}
+
+/* 搜索输入框 */
+.gm-search-input {
+    flex: 1;
+    min-width: 0;
+    height: 26px;
+    padding: 2px 8px;
+    border: 1px solid var(--gm-border);
+    border-radius: var(--gm-radius-sm);
+    background: var(--gm-bg-input);
+    color: var(--gm-text-primary);
+    font-size: var(--gm-font-size);
+    font-family: var(--gm-font);
+    outline: none;
+    transition: border-color var(--gm-transition);
+}
+.gm-search-input::placeholder {
+    color: var(--gm-text-muted);
+}
+.gm-search-input:focus {
+    border-color: var(--gm-accent);
+}
+
+/* 工具栏按钮通用样式 */
+.gm-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    height: 26px;
+    padding: 0 8px;
+    border: none;
+    border-radius: var(--gm-radius-sm);
+    background: var(--gm-accent);
+    color: #fff;
+    font-size: var(--gm-font-size);
+    font-family: var(--gm-font);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background var(--gm-transition), opacity var(--gm-transition);
+    flex-shrink: 0;
+}
+.gm-btn:hover {
+    background: var(--gm-accent-hover);
+}
+.gm-btn:active {
+    opacity: 0.85;
+}
+
+/* 小号/图标按钮 */
+.gm-btn-sm {
+    height: 24px;
+    width: 24px;
+    padding: 0;
+    font-size: var(--gm-font-size-sm);
+    border-radius: 3px;
+}
+
+/* 危险操作按钮 */
+.gm-btn-danger {
+    background: var(--gm-btn-danger);
+}
+.gm-btn-danger:hover {
+    background: var(--gm-btn-danger-hover);
+}
+
+/* 透明按钮（用于内联操作） */
+.gm-btn-ghost {
+    background: transparent;
+    color: var(--gm-text-secondary);
+    border: 1px solid var(--gm-border);
+}
+.gm-btn-ghost:hover {
+    background: var(--gm-bg-hover);
+    color: var(--gm-text-primary);
+}
+
+/* ============================================================
+ * 对话列表容器（可滚动区域）
+ * ============================================================ */
+.gm-list-container {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 2px 0;
+    /* 为滚动条留空间 */
+    scrollbar-width: thin;
+    scrollbar-color: var(--gm-border) transparent;
+}
+
+/* Webkit 滚动条样式 */
+.gm-list-container::-webkit-scrollbar {
+    width: 5px;
+}
+.gm-list-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+.gm-list-container::-webkit-scrollbar-thumb {
+    background: var(--gm-border);
+    border-radius: 3px;
+}
+.gm-list-container::-webkit-scrollbar-thumb:hover {
+    background: var(--gm-border-light);
+}
+
+/* ============================================================
+ * 分组头部
+ * ============================================================ */
+.gm-group-header {
+    display: flex;
+    align-items: center;
+    height: var(--gm-group-header-height);
+    padding: 0 6px;
+    margin: 1px 4px;
+    border-radius: var(--gm-radius-sm);
+    cursor: pointer;
+    transition: background var(--gm-transition);
+    position: relative;
+}
+.gm-group-header:hover {
+    background: var(--gm-bg-hover);
+}
+
+/* 折叠/展开箭头 */
+.gm-group-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    color: var(--gm-text-muted);
+    font-size: 10px;
+    transition: transform var(--gm-transition);
+    margin-right: 2px;
+}
+/* 展开状态：箭头向下旋转 */
+.gm-group-arrow.gm-expanded {
+    transform: rotate(90deg);
+}
+
+/* 分组图标（文件夹） */
+.gm-group-icon {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 6px;
+    color: var(--gm-folder-color);
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+/* 分组名称文本 */
+.gm-group-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 500;
+    color: var(--gm-text-primary);
+    font-size: var(--gm-font-size);
+}
+
+/* 分组计数 */
+.gm-group-count {
+    flex-shrink: 0;
+    font-size: var(--gm-font-size-sm);
+    color: var(--gm-text-muted);
+    margin-right: 4px;
+}
+
+/* 分组操作按钮（...菜单、+添加） */
+.gm-group-actions {
+    display: none;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+}
+.gm-group-header:hover .gm-group-actions {
+    display: flex;
+}
+
+/* ============================================================
+ * 重命名输入框（内联编辑）
+ * ============================================================ */
+.gm-rename-input {
+    flex: 1;
+    min-width: 0;
+    height: 24px;
+    padding: 2px 6px;
+    border: 1px solid var(--gm-accent);
+    border-radius: 3px;
+    background: var(--gm-bg-input);
+    color: var(--gm-text-primary);
+    font-size: var(--gm-font-size);
+    font-family: var(--gm-font);
+    outline: none;
+}
+
+/* ============================================================
+ * 对话列表项
+ * ============================================================ */
+.gm-conversation-item {
+    display: flex;
+    align-items: center;
+    height: var(--gm-item-height);
+    padding: 0 6px;
+    margin: 0 4px 0 16px;  /* 左边缩进表示层级 */
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background var(--gm-transition);
+    position: relative;
+}
+.gm-conversation-item:hover {
+    background: var(--gm-bg-hover);
+}
+/* 当前活跃对话高亮 */
+.gm-conversation-item.gm-active {
+    background: var(--gm-accent-subtle);
+}
+
+/* 对话标题 */
+.gm-conversation-title {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--gm-text-primary);
+    font-size: var(--gm-font-size);
+}
+
+/* 移动按钮（悬浮显示） */
+.gm-move-btn {
+    display: none;
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    line-height: 22px;
+    text-align: center;
+    border-radius: 3px;
+    cursor: pointer;
+    color: var(--gm-text-muted);
+    font-size: 12px;
+    background: transparent;
+    border: none;
+    transition: all var(--gm-transition);
+}
+.gm-conversation-item:hover .gm-move-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.gm-move-btn:hover {
+    background: var(--gm-bg-active);
+    color: var(--gm-accent);
+}
+
+/* ============================================================
+ * 已归档对话（不在 DOM 中，但 meta 有记录）
+ * ============================================================ */
+.gm-conversation-item.gm-archived {
+    opacity: 0.55;
+    font-style: italic;
+}
+.gm-conversation-item.gm-archived:hover {
+    opacity: 0.8;
+}
+
+/* ============================================================
+ * 侧边栏拖拽调整宽度把手
+ * ============================================================ */
+.gm-resize-handle {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    cursor: col-resize;
+    z-index: 10;
+    background: transparent;
+    transition: background 0.15s;
+}
+.gm-resize-handle:hover,
+.gm-resize-handle.gm-resizing {
+    background: var(--gm-accent);
+}
+
+/* ============================================================
+ * 弹出菜单（分组选择器 / 右键菜单）
+ * ============================================================ */
+.gm-popup-menu {
+    position: fixed;
+    z-index: 999999;
+    min-width: 150px;
+    max-width: 220px;
+    background: var(--gm-bg-secondary);
+    border: 1px solid var(--gm-border);
+    border-radius: var(--gm-radius);
+    box-shadow: var(--gm-shadow);
+    padding: 4px 0;
+    font-size: var(--gm-font-size);
+    animation: gm-fade-in 100ms ease;
+}
+@keyframes gm-fade-in {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.gm-popup-menu-item {
+    display: flex;
+    align-items: center;
+    padding: 4px 10px;
+    cursor: pointer;
+    color: var(--gm-text-primary);
+    transition: background var(--gm-transition);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.gm-popup-menu-item:hover {
+    background: var(--gm-bg-hover);
+}
+.gm-popup-menu-item.gm-danger {
+    color: var(--gm-btn-danger);
+}
+.gm-popup-menu-separator {
+    height: 1px;
+    background: var(--gm-border);
+    margin: 4px 0;
+}
+
+/* ============================================================
+ * 新建分组对话框（模态框）
+ * ============================================================ */
+.gm-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999998;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: gm-fade-in 150ms ease;
+}
+.gm-modal {
+    background: var(--gm-bg-secondary);
+    border: 1px solid var(--gm-border);
+    border-radius: 10px;
+    box-shadow: var(--gm-shadow);
+    padding: 20px;
+    min-width: 300px;
+    max-width: 400px;
+}
+.gm-modal-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--gm-text-primary);
+}
+.gm-modal-input {
+    width: 100%;
+    height: 36px;
+    padding: 6px 12px;
+    border: 1px solid var(--gm-border);
+    border-radius: var(--gm-radius-sm);
+    background: var(--gm-bg-input);
+    color: var(--gm-text-primary);
+    font-size: var(--gm-font-size);
+    font-family: var(--gm-font);
+    outline: none;
+    box-sizing: border-box;
+    margin-bottom: 12px;
+}
+.gm-modal-input:focus {
+    border-color: var(--gm-accent);
+}
+.gm-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+/* ============================================================
+ * 批量选择模式
+ * ============================================================ */
+.gm-checkbox {
+    display: none;
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    margin-right: 6px;
+    accent-color: var(--gm-accent);
+    cursor: pointer;
+}
+.gm-batch-mode .gm-checkbox {
+    display: block;
+}
+.gm-batch-mode .gm-move-btn {
+    display: none !important;
+}
+
+/* 批量操作工具栏 */
+.gm-batch-bar {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    background: var(--gm-accent-subtle);
+    border-bottom: 1px solid var(--gm-border);
+    font-size: var(--gm-font-size-sm);
+    flex-shrink: 0;
+}
+.gm-batch-mode ~ .gm-batch-bar {
+    display: flex;
+}
+
+/* ============================================================
+ * "未分组"区域标题
+ * ============================================================ */
+.gm-ungrouped-header {
+    display: flex;
+    align-items: center;
+    height: var(--gm-group-header-height);
+    padding: 0 6px;
+    margin: 2px 4px 1px;
+    border-radius: var(--gm-radius-sm);
+    color: var(--gm-text-secondary);
+    font-size: var(--gm-font-size-sm);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+}
+.gm-ungrouped-header:hover {
+    background: var(--gm-bg-hover);
+}
+
+/* 空状态提示 */
+.gm-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+    color: var(--gm-text-muted);
+    font-size: var(--gm-font-size-sm);
+    text-align: center;
+}
+.gm-empty-state-icon {
+    font-size: 24px;
+    margin-bottom: 8px;
+    opacity: 0.5;
+}
+
+/* ============================================================
+ * 拖动排序相关样式
+ * ============================================================ */
+.gm-dragging {
+    opacity: 0.5;
+}
+.gm-drag-over {
+    outline: 2px dashed var(--gm-accent);
+    outline-offset: -2px;
+    border-radius: var(--gm-radius-sm);
+}
+
+/* ============================================================
+ * 调试面板（开发模式，默认隐藏）
+ * ============================================================ */
+.gm-debug-panel {
+    display: none;
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    z-index: 999999;
+    background: #1a1a2e;
+    border: 1px solid #4f8cff;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 11px;
+    font-family: monospace;
+    color: #4f8cff;
+    max-width: 400px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+.gm-debug-panel.gm-visible {
+    display: block;
+}
+
+/* ============================================================
+ * 滚动加载指示器
+ * ============================================================ */
+.gm-loading-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    color: var(--gm-text-muted);
+    font-size: var(--gm-font-size-sm);
+}
+
+/* ============================================================
+ * 响应式：当侧边栏宽度变化时适配
+ * ============================================================ */
+@media (max-width: 260px) {
+    .gm-group-actions { display: none !important; }
+    .gm-conversation-title { font-size: var(--gm-font-size-sm); }
+}
